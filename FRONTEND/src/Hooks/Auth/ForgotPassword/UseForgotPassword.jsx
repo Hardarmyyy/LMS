@@ -1,0 +1,64 @@
+import { useState, useEffect } from 'react'
+import UseValidateForgotPasswordForm from './UseValidateForgotPassword'
+
+
+const UseForgotPassword = () => {
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    // define a state to handle user email
+    const [user, setUser] = useState({
+        email: ''
+    })
+
+    // define a state to handle email input change validation
+    const [error, setError] = useState({})
+
+    // define a state to handle user email input change
+    const handleChange = (e) => {
+        const {name, value} = e.target
+        setUser((user) => { return {...user, [name]: value.replace(/\s/g, "")} })
+
+        if (name === 'email') {
+            setError((error) => { return {...error, email: value ? emailRegex.test(value) ? '' : 'Enter a valid email address' : 'Enter email address'}})
+        }
+    }
+
+    //UseValidateForgotPasswordForm hook to catch errors on form object ;
+    const {errors} = UseValidateForgotPasswordForm(user)
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleCanSave = (value) => {
+        const canSubmit = Boolean(emailRegex.test(value.email)) // enable the submit button 
+        return canSubmit
+    }
+
+    const isSave = handleCanSave(user)
+
+    const handleForgotPassword = async () => {
+
+        setError(errors)
+
+        if (isSubmitting) return; // Don't submit the form if it's already submitting
+        
+        if (isSave && !isSubmitting) {
+
+            setIsSubmitting(true); 
+            console.log(user)
+            setUser({
+                email: ''
+            })
+            setIsSubmitting(false);
+        }
+    }
+
+    useEffect(() => {
+        handleCanSave(user)
+    }, [user])
+
+
+    return {user, error, handleChange, handleForgotPassword}
+}
+
+export default UseForgotPassword
